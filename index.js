@@ -37,7 +37,13 @@ app.post("/api/etkinlik-ekle", (req, res) => {
       console.error("Etkinlik eklenirken hata:", err);
       return res.status(500).json({ message: "Etkinlik eklenemedi" });
     }
-    res.status(201).json({ message: "Etkinlik başarıyla eklendi", id: result.insertId });
+    // Ekleme başarılıysa tüm etkinlikleri döndür
+    db.query("SELECT * FROM etkinlikler", (err2, results) => {
+      if (err2) {
+        return res.status(500).json({ message: "Etkinlikler alınamadı" });
+      }
+      res.status(201).json({ message: "Etkinlik başarıyla eklendi", etkinlikler: results });
+    });
   });
 });
 
@@ -53,7 +59,36 @@ app.delete("/api/etkinlik-sil/:id", (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Etkinlik bulunamadı" });
     }
-    res.json({ message: "Etkinlik başarıyla silindi" });
+    // Silme başarılıysa tüm etkinlikleri döndür
+    db.query("SELECT * FROM etkinlikler", (err2, results) => {
+      if (err2) {
+        return res.status(500).json({ message: "Etkinlikler alınamadı" });
+      }
+      res.json({ message: "Etkinlik başarıyla silindi", etkinlikler: results });
+    });
+  });
+});
+
+// Etkinlik düzenleme endpointi
+app.put("/api/etkinlik-duzenle/:id", (req, res) => {
+  const { id } = req.params;
+  const { ad, img, aciklama, tarih, mekan, fiyat, kategori } = req.body;
+  const sql = `UPDATE etkinlikler SET ad = ?, img = ?, aciklama = ?, tarih = ?, mekan = ?, fiyat = ?, kategori = ? WHERE id = ?`;
+  db.query(sql, [ad, img, aciklama, tarih, mekan, fiyat, kategori, id], (err, result) => {
+    if (err) {
+      console.error("Etkinlik güncellenirken hata:", err);
+      return res.status(500).json({ message: "Etkinlik güncellenemedi" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Etkinlik bulunamadı" });
+    }
+    // Güncelleme başarılıysa tüm etkinlikleri döndür
+    db.query("SELECT * FROM etkinlikler", (err2, results) => {
+      if (err2) {
+        return res.status(500).json({ message: "Etkinlikler alınamadı" });
+      }
+      res.json({ message: "Etkinlik başarıyla güncellendi", etkinlikler: results });
+    });
   });
 });
 
