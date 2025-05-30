@@ -6,7 +6,7 @@ dotenv.config();
 const connection = mysql.createConnection({
   host: process.env.DB_HOST, // sadece host kısmı
   port: process.env.DB_PORT,                     // Railway'de verilen özel port
-  user: process.env.DB_USER, // Railway'de verilen kullanıcı adı
+  user: process.env.DB_USERNAME, // Railway'de verilen kullanıcı adı
   password: process.env.DB_PASSWORD, // Railway'de verilen şifre
   database: process.env.DB_NAME, // Railway'de oluşturduğunuz veritabanı adı
 });
