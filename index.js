@@ -8,12 +8,12 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Server çalışıyor!");
-  db.query('SELECT NOW() AS current_time', (err, results) => {
+  db.query('SELECT NOW() as t', (err, results) => {
     if (err) {
+      console.error(err);
       return res.status(500).send('Veritabanı hatası');
     }
-    res.send(`Veritabanı bağlantısı başarılı! Sunucu zamanı: ${results[0].current_time}`);
+    res.send(`Veritabanı bağlantısı başarılı! Sunucu zamanı: ${results[0].t}`);
   });
 });
 
