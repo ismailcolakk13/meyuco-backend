@@ -92,6 +92,51 @@ app.put("/api/etkinlik-duzenle/:id", (req, res) => {
   });
 });
 
+// Kullanıcı kayıt (register) endpointi
+app.post("/api/register", (req, res) => {
+  const { email, password, name } = req.body;
+  if (!email || !password || !name) {
+    return res.status(400).json({ message: "Email, ad ve şifre zorunludur" });
+  }
+  const checkSql = "SELECT * FROM users WHERE email = ?";
+  db.query(checkSql, [email], (err, results) => {
+    if (err) return res.status(500).json({ message: "Veritabanı hatası" });
+    if (results.length > 0) {
+      return res.status(409).json({ message: "Bu e-posta zaten kayıtlı" });
+    }
+    const insertSql = "INSERT INTO users (email, password, name) VALUES (?, ?, ?)";
+    db.query(insertSql, [email, password, name], (err2, result) => {
+      if (err2) return res.status(500).json({ message: "Kayıt başarısız" });
+      res.status(201).json({
+        message: "Kayıt başarılı",
+        user: { id: result.insertId, email, name }
+      });
+    });
+  });
+});
+
+// Kullanıcı giriş endpointi
+app.post("/api/giris", (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email ve şifre gereklidir" });
+  }
+  const sql = `SELECT * FROM users WHERE email = ?`;
+  db.query(sql, [email], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: "Veritabanı hatası" });
+    }
+    if (results.length === 0) {
+      return res.status(401).json({ message: "Kullanıcı bulunamadı" });
+    }
+    const user = results[0];
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Şifre hatalı" });
+    }
+    res.json({ message: "Giriş başarılı", user: { id: user.id, email: user.email, name: user.name } });
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor.`);
