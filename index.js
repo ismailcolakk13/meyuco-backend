@@ -167,6 +167,87 @@ app.post("/api/giris", (req, res) => {
   });
 });
 
+// Kullanıcının satın aldığı biletleri ekleyen endpoint
+app.post("/api/bilet-al", (req, res) => {
+  console.log("[DEBUG] POST /api/bilet-al çağrıldı, body:", req.body);
+  const { user_id, etkinlik_id, adet } = req.body;
+  if (!user_id || !etkinlik_id || !adet) {
+    return res.status(400).json({ message: "user_id, etkinlik_id ve adet zorunludur" });
+  }
+  const sql = `INSERT INTO biletler (user_id, etkinlik_id, adet) VALUES (?, ?, ?)`;
+  db.query(sql, [user_id, etkinlik_id, adet], (err, result) => {
+    if (err) {
+      console.error("[DEBUG] /api/bilet-al eklenirken hata:", err);
+      return res.status(500).json({ message: "Bilet eklenemedi" });
+    }
+    console.log("[DEBUG] /api/bilet-al ekleme sonucu:", result);
+    res.status(201).json({ message: "Bilet başarıyla eklendi", bilet_id: result.insertId });
+  });
+});
+
+// Bir kullanıcının satın aldığı tüm etkinlik biletleri ve etkinlik detayları
+app.get("/api/kullanici-biletleri/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  console.log("[DEBUG] GET /api/kullanici-biletleri/:user_id çağrıldı, user_id:", user_id);
+  const sql = `SELECT biletler.id AS bilet_id, etkinlikler.*, biletler.adet, biletler.satin_alma_tarihi FROM biletler JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id WHERE biletler.user_id = ?`;
+  db.query(sql, [user_id], (err, results) => {
+    if (err) {
+      console.error("[DEBUG] /api/kullanici-biletleri alınırken hata:", err);
+      return res.status(500).json({ message: "Biletler alınamadı" });
+    }
+    res.json({ biletler: results });
+  });
+});
+
+// Bir etkinliği satın alan tüm kullanıcılar
+app.get("/api/etkinlik-biletleri/:etkinlik_id", (req, res) => {
+  const { etkinlik_id } = req.params;
+  console.log("[DEBUG] GET /api/etkinlik-biletleri/:etkinlik_id çağrıldı, etkinlik_id:", etkinlik_id);
+  const sql = `SELECT users.id AS user_id, users.name, users.email, biletler.adet, biletler.satin_alma_tarihi FROM biletler JOIN users ON biletler.user_id = users.id WHERE biletler.etkinlik_id = ?`;
+  db.query(sql, [etkinlik_id], (err, results) => {
+    if (err) {
+      console.error("[DEBUG] /api/etkinlik-biletleri alınırken hata:", err);
+      return res.status(500).json({ message: "Kullanıcılar alınamadı" });
+    }
+    res.json({ kullanicilar: results });
+  });
+});
+
+// Tüm biletler, kullanıcı ve etkinlik bilgileriyle
+app.get("/api/tum-biletler", (req, res) => {
+  console.log("[DEBUG] GET /api/tum-biletler çağrıldı");
+  const sql = `SELECT biletler.*, users.name AS kullanici_adi, users.email, etkinlikler.ad AS etkinlik_adi, etkinlikler.tarih FROM biletler JOIN users ON biletler.user_id = users.id JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id`;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("[DEBUG] /api/tum-biletler alınırken hata:", err);
+      return res.status(500).json({ message: "Biletler alınamadı" });
+    }
+    res.json({ biletler: results });
+  });
+});
+
+// Biletler tablosunu oluşturan endpoint
+app.get("/api/create-biletler-table", (req, res) => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS biletler (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      etkinlik_id INT NOT NULL,
+      adet INT DEFAULT 1,
+      satin_alma_tarihi DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id),
+      FOREIGN KEY (etkinlik_id) REFERENCES etkinlikler(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `;
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error("[DEBUG] /api/create-biletler-table tablo oluşturulurken hata:", err);
+      return res.status(500).send("Biletler tablosu oluşturulamadı");
+    }
+    res.send("Biletler tablosu başarıyla oluşturuldu!");
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor.`);
