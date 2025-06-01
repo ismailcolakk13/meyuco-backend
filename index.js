@@ -174,8 +174,18 @@ app.post("/api/bilet-al", (req, res) => {
   if (!user_id || !etkinlik_id || !adet) {
     return res.status(400).json({ message: "user_id, etkinlik_id ve adet zorunludur" });
   }
+  // Koltuk dizisini JSON olarak kaydet
+  let koltukStr = null;
+  if (koltuk) {
+    if (Array.isArray(koltuk)) {
+      koltukStr = JSON.stringify(koltuk);
+    } else if (typeof koltuk === 'string') {
+      // Tek koltuk string geldiyse yine diziye çevirip kaydet
+      koltukStr = JSON.stringify([koltuk]);
+    }
+  }
   const sql = `INSERT INTO biletler (user_id, etkinlik_id, adet, koltuk) VALUES (?, ?, ?, ?)`;
-  db.query(sql, [user_id, etkinlik_id, adet, koltuk || null], (err, result) => {
+  db.query(sql, [user_id, etkinlik_id, adet, koltukStr], (err, result) => {
     if (err) {
       console.error("[DEBUG] /api/bilet-al eklenirken hata:", err);
       return res.status(500).json({ message: "Bilet eklenemedi" });
@@ -282,7 +292,16 @@ app.get("/api/etkinlik-dolu-koltuklar/:etkinlik_id", (req, res) => {
       console.error("[DEBUG] /api/etkinlik-dolu-koltuklar alınırken hata:", err);
       return res.status(500).json({ message: "Dolu koltuklar alınamadı" });
     }
-    const dolu_koltuklar = results.map(r => r.koltuk).filter(Boolean);
+    // Her kayıttaki koltuk JSON dizisini açıp birleştir
+    let dolu_koltuklar = [];
+    results.forEach(r => {
+      if (r.koltuk) {
+        try {
+          const arr = JSON.parse(r.koltuk);
+          if (Array.isArray(arr)) dolu_koltuklar.push(...arr);
+        } catch (e) { /* ignore parse error */ }
+      }
+    });
     res.json({ dolu_koltuklar });
   });
 });
