@@ -189,7 +189,7 @@ app.post("/api/bilet-al", (req, res) => {
 app.get("/api/kullanici-biletleri/:user_id", (req, res) => {
   const { user_id } = req.params;
   console.log("[DEBUG] GET /api/kullanici-biletleri/:user_id çağrıldı, user_id:", user_id);
-  const sql = `SELECT biletler.id AS bilet_id, etkinlikler.*, biletler.adet, biletler.satin_alma_tarihi FROM biletler JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id WHERE biletler.user_id = ?`;
+  const sql = `SELECT biletler.id AS bilet_id, etkinlikler.*, biletler.adet, biletler.satin_alma_tarihi, biletler.koltuk FROM biletler JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id WHERE biletler.user_id = ?`;
   db.query(sql, [user_id], (err, results) => {
     if (err) {
       console.error("[DEBUG] /api/kullanici-biletleri alınırken hata:", err);
@@ -203,7 +203,7 @@ app.get("/api/kullanici-biletleri/:user_id", (req, res) => {
 app.get("/api/etkinlik-biletleri/:etkinlik_id", (req, res) => {
   const { etkinlik_id } = req.params;
   console.log("[DEBUG] GET /api/etkinlik-biletleri/:etkinlik_id çağrıldı, etkinlik_id:", etkinlik_id);
-  const sql = `SELECT users.id AS user_id, users.name, users.email, biletler.adet, biletler.satin_alma_tarihi FROM biletler JOIN users ON biletler.user_id = users.id WHERE biletler.etkinlik_id = ?`;
+  const sql = `SELECT users.id AS user_id, users.name, users.email, biletler.adet, biletler.satin_alma_tarihi, biletler.koltuk FROM biletler JOIN users ON biletler.user_id = users.id WHERE biletler.etkinlik_id = ?`;
   db.query(sql, [etkinlik_id], (err, results) => {
     if (err) {
       console.error("[DEBUG] /api/etkinlik-biletleri alınırken hata:", err);
