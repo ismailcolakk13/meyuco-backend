@@ -249,6 +249,44 @@ app.get("/api/create-biletler-table", (req, res) => {
   });
 });
 
+// Belirli bir biletin tüm detaylarını döndüren endpoint
+app.get("/api/bilet-detay/:bilet_id", (req, res) => {
+  const { bilet_id } = req.params;
+  console.log("[DEBUG] GET /api/bilet-detay/:bilet_id çağrıldı, bilet_id:", bilet_id);
+  const sql = `
+    SELECT biletler.*, users.name AS kullanici_adi, users.email, etkinlikler.ad AS etkinlik_adi, etkinlikler.tarih, etkinlikler.mekan, etkinlikler.fiyat, etkinlikler.kategori
+    FROM biletler
+    JOIN users ON biletler.user_id = users.id
+    JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id
+    WHERE biletler.id = ?
+  `;
+  db.query(sql, [bilet_id], (err, results) => {
+    if (err) {
+      console.error("[DEBUG] /api/bilet-detay alınırken hata:", err);
+      return res.status(500).json({ message: "Bilet detayı alınamadı" });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Bilet bulunamadı" });
+    }
+    res.json({ bilet: results[0] });
+  });
+});
+
+// Bir etkinlikteki dolu koltukları döndüren endpoint
+app.get("/api/etkinlik-dolu-koltuklar/:etkinlik_id", (req, res) => {
+  const { etkinlik_id } = req.params;
+  console.log("[DEBUG] GET /api/etkinlik-dolu-koltuklar/:etkinlik_id çağrıldı, etkinlik_id:", etkinlik_id);
+  const sql = `SELECT koltuk FROM biletler WHERE etkinlik_id = ? AND koltuk IS NOT NULL`;
+  db.query(sql, [etkinlik_id], (err, results) => {
+    if (err) {
+      console.error("[DEBUG] /api/etkinlik-dolu-koltuklar alınırken hata:", err);
+      return res.status(500).json({ message: "Dolu koltuklar alınamadı" });
+    }
+    const dolu_koltuklar = results.map(r => r.koltuk).filter(Boolean);
+    res.json({ dolu_koltuklar });
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor.`);
