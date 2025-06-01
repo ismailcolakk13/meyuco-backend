@@ -170,12 +170,12 @@ app.post("/api/giris", (req, res) => {
 // Kullanıcının satın aldığı biletleri ekleyen endpoint
 app.post("/api/bilet-al", (req, res) => {
   console.log("[DEBUG] POST /api/bilet-al çağrıldı, body:", req.body);
-  const { user_id, etkinlik_id, adet } = req.body;
+  const { user_id, etkinlik_id, adet, koltuk } = req.body;
   if (!user_id || !etkinlik_id || !adet) {
     return res.status(400).json({ message: "user_id, etkinlik_id ve adet zorunludur" });
   }
-  const sql = `INSERT INTO biletler (user_id, etkinlik_id, adet) VALUES (?, ?, ?)`;
-  db.query(sql, [user_id, etkinlik_id, adet], (err, result) => {
+  const sql = `INSERT INTO biletler (user_id, etkinlik_id, adet, koltuk) VALUES (?, ?, ?, ?)`;
+  db.query(sql, [user_id, etkinlik_id, adet, koltuk || null], (err, result) => {
     if (err) {
       console.error("[DEBUG] /api/bilet-al eklenirken hata:", err);
       return res.status(500).json({ message: "Bilet eklenemedi" });
@@ -226,7 +226,7 @@ app.get("/api/tum-biletler", (req, res) => {
   });
 });
 
-// Biletler tablosunu oluşturan endpoint
+// Biletler tablosunu oluşturan endpoint (koltuk bilgisi eklendi)
 app.get("/api/create-biletler-table", (req, res) => {
   const sql = `
     CREATE TABLE IF NOT EXISTS biletler (
@@ -234,6 +234,7 @@ app.get("/api/create-biletler-table", (req, res) => {
       user_id INT NOT NULL,
       etkinlik_id INT NOT NULL,
       adet INT DEFAULT 1,
+      koltuk VARCHAR(50) DEFAULT NULL,
       satin_alma_tarihi DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (etkinlik_id) REFERENCES etkinlikler(id)
