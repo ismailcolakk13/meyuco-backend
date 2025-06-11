@@ -208,7 +208,7 @@ app.post("/api/giris", (req, res) => {
     console.log("[DEBUG] /api/giris giriş başarılı, user:", user);
     res.json({
       message: "Giriş başarılı",
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name , role: user.role }
     });
   });
 });
