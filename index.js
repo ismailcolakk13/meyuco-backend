@@ -376,7 +376,7 @@ app.get("/api/etkinlik-dolu-koltuklar/:etkinlik_id", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Şifremi unuttum endpointi: e-posta + yeni şifre ile kullanıcı şifresini günceller
 app.put("/api/sifremi-unuttum", (req, res) => {
