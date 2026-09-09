@@ -1,4 +1,4 @@
-const db = require('./db.js');
+const db = require('../db.js');
 const pool = db.pool || db;
 
 // DuckDuckGo'nun yapısını tırnak karmaşası olmadan düz string birleştirmeyle çağıran fonksiyon
