@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const db = require("./db");
-
+const { updateMissingImages } = require('./imageScraper.js');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -357,5 +357,6 @@ app.put("/api/sifremi-unuttum", async (req, res) => {
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server ${PORT} portunda çalışıyor.`);
+  updateMissingImages();
 });
 
