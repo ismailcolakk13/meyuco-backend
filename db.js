@@ -6,17 +6,31 @@ dotenv.config();
 // NUMERIC / DECIMAL verilerini float olarak ayrıştır
 types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
 
+const connectionString = process.env.DB_URL;
+
 // Bağlantı havuzu (pool)
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
-  user: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-});
+const pool = new Pool(
+  connectionString
+    ? {
+        connectionString,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
+      }
+    : {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 5432,
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+      }
+);
 
 pool.connect((err, client, release) => {
   if (err) {
