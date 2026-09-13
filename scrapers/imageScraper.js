@@ -1,5 +1,4 @@
-const db = require('../db.js');
-const pool = db.pool || db;
+const pool = require('../db.js');
 
 // DuckDuckGo'nun yapısını tırnak karmaşası olmadan düz string birleştirmeyle çağıran fonksiyon
 // DuckDuckGo resim arama servisini doğru URL yapılarıyla çağıran fonksiyon

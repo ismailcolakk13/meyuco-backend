@@ -82,31 +82,6 @@ router.get("/tum-biletler", async (req, res) => {
   }
 });
 
-// Biletler tablosunu oluşturan endpoint (koltuk bilgisi eklendi)
-router.get("/create-biletler-table", async (req, res) => {
-  const sql = `
-    CREATE TABLE IF NOT EXISTS biletler (
-      id SERIAL PRIMARY KEY,
-      user_id INT NOT NULL,
-      etkinlik_id INT NOT NULL,
-      adet INT DEFAULT 1,
-      koltuk VARCHAR(255) DEFAULT NULL,
-      satin_alma_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-      FOREIGN KEY (etkinlik_id) REFERENCES etkinlikler(id) ON DELETE CASCADE
-    );
-  `;
-  try {
-    await db.query(sql);
-    res.send("Biletler tablosu başarıyla oluşturuldu!");
-  } catch (err) {
-    console.error(
-      "[DEBUG] /api/create-biletler-table tablo oluşturulurken hata:",
-      err
-    );
-    return res.status(500).send("Biletler tablosu oluşturulamadı");
-  }
-});
 
 // Belirli bir biletin tüm detaylarını döndüren endpoint
 router.get("/bilet-detay/:bilet_id", async (req, res) => {
