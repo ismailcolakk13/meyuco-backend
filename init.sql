@@ -20,15 +20,33 @@ CREATE TABLE IF NOT EXISTS etkinlikler (
   kategori VARCHAR(100)
 );
 
+CREATE TABLE IF NOT EXISTS odemeler (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  etkinlik_id INT NOT NULL,
+  tutar DECIMAL(10, 2) NOT NULL,
+  adet INT NOT NULL DEFAULT 1,
+  koltuk VARCHAR(255) DEFAULT NULL,
+  odeme_saglayici VARCHAR(50) DEFAULT 'iyzico',
+  odeme_id VARCHAR(255) DEFAULT NULL,
+  durum VARCHAR(50) DEFAULT 'beklemede',
+  hata_mesaji TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (etkinlik_id) REFERENCES etkinlikler(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS biletler (
   id SERIAL PRIMARY KEY,
   user_id INT NOT NULL,
   etkinlik_id INT NOT NULL,
   adet INT DEFAULT 1,
   koltuk VARCHAR(255) DEFAULT NULL,
+  odeme_id INT DEFAULT NULL,
   satin_alma_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (etkinlik_id) REFERENCES etkinlikler(id) ON DELETE CASCADE
+  FOREIGN KEY (etkinlik_id) REFERENCES etkinlikler(id) ON DELETE CASCADE,
+  FOREIGN KEY (odeme_id) REFERENCES odemeler(id) ON DELETE SET NULL
 );
 
 -- Default Users
@@ -79,4 +97,5 @@ ON CONFLICT (id) DO UPDATE SET
 -- Sync Sequences
 SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 1));
 SELECT setval('etkinlikler_id_seq', COALESCE((SELECT MAX(id) FROM etkinlikler), 1));
+SELECT setval('odemeler_id_seq', COALESCE((SELECT MAX(id) FROM odemeler), 1));
 SELECT setval('biletler_id_seq', COALESCE((SELECT MAX(id) FROM biletler), 1));

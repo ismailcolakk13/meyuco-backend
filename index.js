@@ -7,6 +7,7 @@ const { updateMissingImages } = require("./scrapers/imageScraper");
 const authRoutes = require("./routes/auth");
 const etkinlikRoutes = require("./routes/etkinlikler");
 const biletRoutes = require("./routes/biletler");
+const odemeRoutes = require("./routes/odeme");
 
 const app = express();
 app.use(cors());
@@ -29,6 +30,7 @@ app.get("/", async (req, res) => {
 app.use("/api", authRoutes);
 app.use("/api", etkinlikRoutes);
 app.use("/api", biletRoutes);
+app.use("/api", odemeRoutes);
 
 const PORT = process.env.PORT || 5001;
 

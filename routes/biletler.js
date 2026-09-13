@@ -42,7 +42,23 @@ router.get("/kullanici-biletleri/:user_id", async (req, res) => {
     "[DEBUG] GET /api/kullanici-biletleri/:user_id çağrıldı, user_id:",
     user_id
   );
-  const sql = `SELECT biletler.id AS bilet_id, etkinlikler.*, biletler.adet, biletler.satin_alma_tarihi, biletler.koltuk FROM biletler JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id WHERE biletler.user_id = $1`;
+  const sql = `
+    SELECT 
+      biletler.id AS bilet_id, 
+      etkinlikler.*, 
+      biletler.adet, 
+      biletler.satin_alma_tarihi, 
+      biletler.koltuk,
+      odemeler.tutar AS odenen_tutar,
+      odemeler.odeme_saglayici,
+      odemeler.odeme_id AS provider_payment_id,
+      odemeler.durum AS odeme_durumu
+    FROM biletler 
+    JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id 
+    LEFT JOIN odemeler ON biletler.odeme_id = odemeler.id
+    WHERE biletler.user_id = $1
+    ORDER BY biletler.satin_alma_tarihi DESC
+  `;
   try {
     const result = await db.query(sql, [user_id]);
     res.json({ biletler: result.rows });
@@ -91,10 +107,23 @@ router.get("/bilet-detay/:bilet_id", async (req, res) => {
     bilet_id
   );
   const sql = `
-    SELECT biletler.*, users.name AS kullanici_adi, users.email, etkinlikler.ad AS etkinlik_adi, etkinlikler.tarih, etkinlikler.mekan, etkinlikler.fiyat, etkinlikler.kategori
+    SELECT 
+      biletler.*, 
+      users.name AS kullanici_adi, 
+      users.email, 
+      etkinlikler.ad AS etkinlik_adi, 
+      etkinlikler.tarih, 
+      etkinlikler.mekan, 
+      etkinlikler.fiyat, 
+      etkinlikler.kategori,
+      odemeler.tutar AS odenen_tutar,
+      odemeler.odeme_saglayici,
+      odemeler.odeme_id AS provider_payment_id,
+      odemeler.durum AS odeme_durumu
     FROM biletler
     JOIN users ON biletler.user_id = users.id
     JOIN etkinlikler ON biletler.etkinlik_id = etkinlikler.id
+    LEFT JOIN odemeler ON biletler.odeme_id = odemeler.id
     WHERE biletler.id = $1
   `;
   try {
