@@ -223,3 +223,4 @@ Dilerseniz geçerli herhangi bir iyzico test kartını da manuel yazabilirsiniz:
    - Başarılı ödemenin ardından yeşil onay damgasıyla ödeme referansı, bilet ID'si, koltuklar ve ödenen net tutar listelenir.
 4. **Profil Entegrasyonu ([`Profile.jsx`](file:///Volumes/SandiskSSD/Kodlar/meyuco/src/Pages/Profile.jsx)):**
    - Kullanıcının biletleri listelenirken ödenen tutar `💳 ... ₺` rozeti ile şeffaf şekilde gösterilir.
+
